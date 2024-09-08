@@ -45,12 +45,12 @@
         footer {
             background-color: #e0e0e0;
             text-align: center;
-            padding: 10px;
             position: fixed;
             width: 100%;
             bottom: 0;
             border-top: 2px solid #ccc;
             margin: 0;
+            left:0;
         }
         a {
             color: #000;
@@ -83,57 +83,66 @@
         ©opyright by <a href="https://instagram.com/st.josephz_">st josephz</a>
     </footer>
 
-<Script>
-document.addEventListener("DOMContentLoaded", function() {
-    // Define subjects and their chapters
-    const subjects = {
-        "computer": ["chapter1.pdf"],
-        "physics":["chapter2.pdf"]
-    };
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Define subjects and their chapters
+        const subjects = [
+            "Hindi", "English", "Maths", "Computer", "Physics", "Chemistry"
+        ];
 
-    // Function to populate subjects
-    function populateSubjects() {
-        const subjectSelect = document.getElementById('subject');
-        Object.keys(subjects).forEach(subject => {
-            const option = document.createElement('option');
-            option.value = subject;
-            option.textContent = subject;
-            subjectSelect.appendChild(option);
-        });
-    }
-
-    // Function to load chapters based on the selected subject
-    function loadChapters() {
-        const subject = document.getElementById('subject').value;
-        const chapterSelect = document.getElementById('chapter');
-        chapterSelect.innerHTML = '<option value="">Select Chapter</option>'; // Clear previous options
-
-        if (subjects[subject]) {
-            subjects[subject].forEach((chapter, index) => {
+        // Function to populate subjects
+        function populateSubjects() {
+            const subjectSelect = document.getElementById('subject');
+            subjects.forEach(subject => {
                 const option = document.createElement('option');
-                option.value = `file${index + 1}`;
-                option.textContent = chapter;
-                chapterSelect.appendChild(option);
+                option.value = subject;
+                option.textContent = subject;
+                subjectSelect.appendChild(option);
             });
         }
-    }
 
-    // Function to handle file download
-    function downloadNote() {
-        const subject = document.getElementById('subject').value;
-        const chapter = document.getElementById('chapter').value;
-        if (subject && chapter) {
-            const url = `${subject}/${chapter}.pdf`;
-            window.location.href = url; // Trigger download
+        // Function to load chapters based on the selected subject
+        async function loadChapters() {
+            const subject = document.getElementById('subject').value;
+            const chapterSelect = document.getElementById('chapter');
+            chapterSelect.innerHTML = '<option value="">Select Chapter</option>'; // Clear previous options
+
+            if (subject) {
+                try {
+                    const response = await fetch(`/${subject}/list.json`);
+                    if (response.ok) {
+                        const chapters = await response.json();
+                        chapters.forEach((chapter, index) => {
+                            const option = document.createElement('option');
+                            option.value = `chapter${index + 1}`;
+                            option.textContent = chapter;
+                            chapterSelect.appendChild(option);
+                        });
+                    } else {
+                        console.error('Failed to load chapters');
+                    }
+                } catch (error) {
+                    console.error('Error fetching chapter list:', error);
+                }
+            }
         }
-    }
 
-    document.getElementById('subject').addEventListener('change', loadChapters);
-    document.querySelector('button').addEventListener('click', downloadNote);
+        // Function to handle file download
+        function downloadNote() {
+            const subject = document.getElementById('subject').value;
+            const chapter = document.getElementById('chapter').value;
+            if (subject && chapter) {
+                const url = `/${subject}/${chapter}.pdf`;
+                window.location.href = url; // Trigger download
+            }
+        }
 
-    // Populate subjects on page load
-    populateSubjects();
-});
-</Script>
+        document.getElementById('subject').addEventListener('change', loadChapters);
+        document.querySelector('button').addEventListener('click', downloadNote);
+
+        // Populate subjects on page load
+        populateSubjects();
+    });
+    </script>
 </body>
 </html>
